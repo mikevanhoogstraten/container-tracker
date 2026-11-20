@@ -17,15 +17,17 @@ const trackerAppStyles = `
 .tracker-content {min-width:0; padding:26px 30px 40px;}
 .tracker-content > h2 {margin-top:20px;}
 .tracker-content .container-dashboard-grid {display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:16px !important; align-items:start;}
-.tracker-container-card {height:360px !important; min-height:360px; max-height:360px; overflow:hidden; background:#fff; border:1px solid #e5eaf1; border-radius:13px; box-shadow:0 3px 12px rgba(28,48,83,.05);}
+.tracker-container-card {height:440px !important; min-height:440px; max-height:440px; overflow:hidden; background:#fff; border:1px solid #e5eaf1; border-radius:13px; box-shadow:0 3px 12px rgba(28,48,83,.05);}
 .tracker-container-card .tracker-article-scroll {min-height:0 !important; max-height:none !important; overflow-y:auto !important; scrollbar-width:thin;}
 .tracker-container-card > div:last-child {flex-shrink:0;}
-.tracker-card-header {display:grid; grid-template-columns:minmax(0,1fr) minmax(158px, 58%); gap:8px; align-items:start;}
-.tracker-card-actions {display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px;}
-.tracker-card-actions a,.tracker-card-actions button {display:flex; justify-content:center; align-items:center; text-align:center; min-width:0; min-height:31px; padding:5px 4px !important; font-size:10px !important; line-height:1.15; font-weight:650; border-radius:7px; border:1px solid #cddced; background:#f4f8ff; color:#0756b9; text-decoration:none; cursor:pointer; white-space:normal; box-shadow:none;}
+.tracker-card-header {display:grid; grid-template-columns:minmax(0,1fr); gap:7px; align-items:start;}
+.tracker-card-actions {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px;}
+.tracker-card-actions a,.tracker-card-actions button {display:flex; justify-content:center; align-items:center; text-align:center; min-width:0; min-height:25px; padding:3px 2px !important; font-size:9px !important; line-height:1.15; font-weight:650; border-radius:7px; border:1px solid #cddced; background:#f4f8ff; color:#0756b9; text-decoration:none; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; box-shadow:none;}
+.tracker-card-actions .tracker-small-copy {min-width:0;display:flex;}
+.tracker-card-actions .tracker-small-copy button {width:100%;}
 .tracker-card-actions a:hover,.tracker-card-actions button:hover:not(:disabled) {background:#e8f1ff;}
 .tracker-card-actions a[aria-disabled="true"],.tracker-card-actions button:disabled {opacity:.43;cursor:not-allowed;}
-@media (max-width:380px) {.tracker-card-header {grid-template-columns:minmax(0,1fr) minmax(148px,58%);}}
+
 @media (max-width:1150px) {.tracker-content .container-dashboard-grid {grid-template-columns:repeat(2,minmax(0,1fr)) !important;} .tracker-layout {grid-template-columns:195px minmax(0,1fr);}}
 @media (max-width:740px) {.tracker-layout {display:block;} .tracker-sidebar {padding:10px 12px; border-right:0; border-bottom:1px solid #e5eaf1;} .tracker-sidebar-brand,.tracker-sidebar-caption {display:none;} .tracker-sidebar nav {flex-direction:row; overflow-x:auto; gap:5px;} .tracker-sidebar nav button {width:auto; flex:0 0 auto; padding:9px; font-size:12px;} .tracker-content {padding:18px 12px 30px;} .tracker-app-shell > header {padding:14px 12px !important;} .tracker-content .container-dashboard-grid {grid-template-columns:1fr !important;} }
 `;
@@ -170,7 +172,7 @@ function CarrierTracking({container}){
   if(!carrier)return null;
   return <a href={TRACKING_URLS[carrier]} target="_blank" rel="noopener noreferrer" title={carrier==='ONE'?'Open het vaarschema van ONE; zoek daar op de bootnaam':'Open de trackingpagina van '+CARRIERS[carrier]+'; controleer daar het containernummer'} style={{fontSize:12,fontWeight:600,color:'#075bb8',textDecoration:'underline'}}>{carrier==='ONE'?'Vaarschema ONE (zoek op bootnaam) ↗':'Track via '+CARRIERS[carrier]+' ↗'}</a>;
 }
-function CopyContainerNumber({number}){
+function CopyContainerNumber({number,compact=false}){
   const [copied,setCopied]=useState(false);
   async function copy(){
     try{
@@ -181,9 +183,9 @@ function CopyContainerNumber({number}){
       window.prompt('Kopieer het containernummer met Ctrl+C:',String(number||''));
     }
   }
-  return <button type="button" className="secondary" onClick={copy} style={{fontSize:12,padding:'6px 10px'}} title="Containernummer kopiëren">{copied?'Gekopieerd ✓':'Containernummer kopiëren'}</button>;
+  return <button type="button" className="secondary" onClick={copy} style={{fontSize:12,padding:'6px 10px'}} title="Containernummer kopiëren">{copied?'Gekopieerd ✓':compact?'Kopieer nr.':'Containernummer kopiëren'}</button>;
 }
-function CopyVesselName({name}){
+function CopyVesselName({name,compact=false}){
   const [copied,setCopied]=useState(false);
   async function copy(){
     const ship=String(name||'').trim();
@@ -196,7 +198,7 @@ function CopyVesselName({name}){
       window.prompt('Kopieer de bootnaam met Ctrl+C:',ship);
     }
   }
-  return <button type="button" className="secondary" disabled={!String(name||'').trim()} onClick={copy} style={{fontSize:12,padding:'6px 10px'}} title="Bootnaam kopiëren">{copied?'Gekopieerd ✓':'Bootnaam kopiëren'}</button>;
+  return <button type="button" className="secondary" disabled={!String(name||'').trim()} onClick={copy} style={{fontSize:12,padding:'6px 10px'}} title="Bootnaam kopiëren">{copied?'Gekopieerd ✓':compact?'Kopieer boot':'Bootnaam kopiëren'}</button>;
 }
 function DashboardTrackingActions({container}){
   const carrier=chosenCarrier(container);
@@ -205,8 +207,8 @@ function DashboardTrackingActions({container}){
   return <div className="tracker-card-actions" aria-label="Tracking en kopieren">
     {shipLink?<a href={shipLink} target="_blank" rel="noopener noreferrer" title="Zoek boot op VesselFinder">VesselFinder ↗</a>:<a aria-disabled="true" title="Vul eerst een bootnaam in">VesselFinder</a>}
     {carrierLink?<a href={carrierLink} target="_blank" rel="noopener noreferrer" title={carrier==='ONE'?'Zoek op bootnaam in ONE vaarschema':'Track container bij '+CARRIERS[carrier]}>Rederij ↗</a>:<a aria-disabled="true" title="Kies eerst een rederij in Details">Rederij</a>}
-    <CopyContainerNumber number={container.container_number}/>
-    <CopyVesselName name={container.vessel}/>
+    <span className="tracker-small-copy"><CopyContainerNumber number={container.container_number} compact/></span>
+    <span className="tracker-small-copy"><CopyVesselName name={container.vessel} compact/></span>
   </div>;
 }
 function StatusIndicator({label,checked}){return <span title={label+': '+(checked?'Ja':'Nee')} style={{display:'inline-flex',alignItems:'center',gap:5,fontSize:11,color:checked?'#176b4d':'#65758a',whiteSpace:'nowrap'}}><span aria-hidden="true" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:16,height:16,borderRadius:4,border:'1px solid '+(checked?'#2c946d':'#a9b7c6'),background:checked?'#e2f5eb':'#f6f8fb',fontWeight:800,fontSize:12}}>{checked?'✓':'–'}</span>{label}</span>}
@@ -228,7 +230,7 @@ const safeDashboardPage=Math.min(dashboardPage,dashboardPages-1);
 const supplierMatches=supplierOptions.filter(x=>(x.supplier_name+' '+x.supplier_code).toLocaleLowerCase('nl').includes(supplierQuery.trim().toLocaleLowerCase('nl'))).slice(0,40);const open=active.reduce((n,c)=>n+(!c.released)+(!c.documents_emq)+(!c.unloading_planned)+c.container_suppliers.reduce((v,s)=>v+(!s.deposit_paid)+(!s.fully_paid),0),0);
 if(!db)return <main><h1>Container Tracker</h1><p>Vul eerst VITE_SUPABASE_URL en VITE_SUPABASE_ANON_KEY in via je .env-bestand of GitHub-instellingen.</p></main>;
 if(!session)return <main className="login"><h1>🚢 Container Tracker</h1><p>Log in met je goedgekeurde account.</p><form onSubmit={async e=>{e.preventDefault();const{error}=await db.auth.signInWithPassword({email,password});setError(error?.message||'')}}><input type="email" required placeholder="E-mailadres" value={email} onChange={e=>setEmail(e.target.value)}/><input type="password" required placeholder="Wachtwoord" value={password} onChange={e=>setPassword(e.target.value)}/><button>Inloggen</button></form>{error&&<p className="error">{error}</p>}</main>;
-return <main className="tracker-app-shell"><style>{trackerAppStyles}</style><header><div><small>INKOOP VERPAKKINGEN</small><h1>🚢 Container Tracker</h1><div style={{fontSize:12,fontWeight:700,color:"#176b4d",marginTop:4}}>Versie DASHBOARD-VIER-KNOPPEN-20261120</div></div><button className="secondary" onClick={()=>db.auth.signOut()}>Uitloggen</button></header><div className="tracker-layout"><aside className="tracker-sidebar"><div className="tracker-sidebar-brand">🚢 <strong>Container Tracker</strong></div><div className="tracker-sidebar-caption">INKOOP VERPAKKINGEN</div><nav aria-label="Hoofdnavigatie">{[['dashboard','▦','Dashboard'],['containers','▤','Containers'],['archived','▣','Gearchiveerd'],['detail','◫','Details']].map(([k,ico,v])=><button type="button" className={view===k?'active':'secondary'} onClick={()=>setView(k)} key={k}><span aria-hidden="true">{ico}</span> {v}</button>)}</nav></aside><div className="tracker-content">{error&&<p className="error">{error}</p>}{loading&&<p>Laden...</p>}
+return <main className="tracker-app-shell"><style>{trackerAppStyles}</style><header><div><small>INKOOP VERPAKKINGEN</small><h1>🚢 Container Tracker</h1><div style={{fontSize:12,fontWeight:700,color:"#176b4d",marginTop:4}}>Versie DASHBOARD-COMPACT-HOGER-20261120</div></div><button className="secondary" onClick={()=>db.auth.signOut()}>Uitloggen</button></header><div className="tracker-layout"><aside className="tracker-sidebar"><div className="tracker-sidebar-brand">🚢 <strong>Container Tracker</strong></div><div className="tracker-sidebar-caption">INKOOP VERPAKKINGEN</div><nav aria-label="Hoofdnavigatie">{[['dashboard','▦','Dashboard'],['containers','▤','Containers'],['archived','▣','Gearchiveerd'],['detail','◫','Details']].map(([k,ico,v])=><button type="button" className={view===k?'active':'secondary'} onClick={()=>setView(k)} key={k}><span aria-hidden="true">{ico}</span> {v}</button>)}</nav></aside><div className="tracker-content">{error&&<p className="error">{error}</p>}{loading&&<p>Laden...</p>}
 {view==='dashboard'&&<><div style={{margin:'16px 0',padding:16,background:'#f4f8fb',border:'1px solid #dbe5ec',borderRadius:10}}><label htmlFor="dashboard-search" style={{display:'block',fontWeight:700,marginBottom:8}}>Zoeken op dashboard</label><div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><input id="dashboard-search" type="search" style={{flex:'1 1 260px',minWidth:0}} placeholder="Artikelnummer, containernummer, BL, schip of ordernummer" value={dashboardQuery} onChange={e=>{setDashboardQuery(e.target.value);setDashboardPage(0)}}/>{dashboardQuery&&<button type="button" className="secondary" onClick={()=>{setDashboardQuery('');setDashboardPage(0)}}>Wissen</button>}</div><p style={{margin:'8px 0 0',fontSize:13,color:'#52697c'}}>{searchTerm?`${dashboardResults.length} van ${active.length} actieve containers gevonden`:'Typ een paar letters of cijfers; zoeken werkt ook midden in een nummer of naam.'}</p></div>{active.length===0&&<p>Geen actieve containers.</p>}{active.length>0&&dashboardResults.length===0&&<p>Geen containers gevonden voor deze zoekopdracht. Probeer een ander deel van de naam of het nummer.</p>}<div className="container-dashboard-grid">{dashboardResults.slice(safeDashboardPage*16,(safeDashboardPage+1)*16).map(dashboardCard)}</div>{dashboardResults.length>16&&<div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12,marginTop:18}}><button className="secondary" disabled={safeDashboardPage===0} onClick={()=>setDashboardPage(p=>Math.max(0,p-1))}>Vorige 16</button><span>Pagina {safeDashboardPage+1} van {dashboardPages}</span><button className="secondary" disabled={(safeDashboardPage+1)>=dashboardPages} onClick={()=>setDashboardPage(p=>p+1)}>Volgende 16</button></div>}</>}
 {view==='containers'&&<><h2>Nieuwe container</h2><form className="grid" onSubmit={e=>{e.preventDefault();act(insert('containers',{...draft,eta:draft.eta||null,etd:draft.etd||null}));setDraft({container_number:'',vessel:'',bl_number:'',eta:'',etd:''})}}>{[['container_number','Containernummer'],['vessel','Bootnaam'],['bl_number','BL-nummer'],['eta','ETA'],['etd','ETD']].map(([k,l])=><label key={k}>{l}<input required={k==='container_number'} type={k==='eta'||k==='etd'?'date':'text'} value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/></label>)}<button>Container toevoegen</button></form><h2>Actieve containers</h2>{active.length===0&&<p>Geen actieve containers.</p>}{active.map(c=><article key={c.id}><div className="between" style={{gap:12,flexWrap:'wrap'}}><div><b>{c.container_number}</b> · {c.vessel||'Boot onbekend'} · {c.container_suppliers.length} leveranciers</div><div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button className="secondary" onClick={()=>{setSelected(c.id);setView('detail')}}>Details</button>{archiveButton(c,true)}</div></div></article>)}</>}
 {view==='archived'&&<><h2>Gearchiveerde containers</h2><p>Gearchiveerde containers blijven bewaard en kunnen worden teruggezet.</p>{data.filter(c=>c.archived).length===0&&<p>Het archief is nog leeg.</p>}{data.filter(c=>c.archived).map(c=>containerOverview(c,true))}</>}
